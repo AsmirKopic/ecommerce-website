@@ -17,17 +17,24 @@ export class ProductService {
   // map the JSON data from Spring data rest to Product array 
   getProductList(theCategoryId: number): Observable<Product[]> {
 
+    // build URL based on ID
     const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${theCategoryId}`;
 
+    return this.getProducts(searchUrl);
+  }
+
+  searchProducts(theKeyword: string): Observable<Product[]> {
+
+    // build URL based on keyword
+    const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${theKeyword}`;
+
+    return this.getProducts(searchUrl);
+  }
+
+  private getProducts(searchUrl: string): Observable<Product[]> {
     return this.httpClient.get<GetResponseProducts>(searchUrl).pipe(
       map(response => response._embedded.products)
     );
-  }
-
-  searchProduct(theKeyword: string) {
-
-    // continue work here
-    throw new Error('Method not implemented.');
   }
 
   getProductCategories(): Observable<ProductCategory[]> {
@@ -35,7 +42,6 @@ export class ProductService {
     return this.httpClient.get<GetResponseProductCategory>(this.categoryUrl).pipe(
       map(response => response._embedded.productCategory)
     );
-
   }
 
 }

@@ -37,15 +37,17 @@ export class ProductListComponent implements OnInit {
 
   }
 
-  handleSearchProducts(){
 
-    const theKeyword: string = this.route.snapshot.paramMap.get('keyword');
-    
-    this.productService.searchProduct(theKeyword).subscribe(
+  handleSearchProducts() {
+
+    const theKeyword: string = this.route.snapshot.paramMap.get('keyword')!;
+
+    // now search for the products using keyword
+    this.productService.searchProducts(theKeyword).subscribe(
       data => {
         this.products = data;
       }
-    );
+    )
   }
 
   handleListProducts(){
