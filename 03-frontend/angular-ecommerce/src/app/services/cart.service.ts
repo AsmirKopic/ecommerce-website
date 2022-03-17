@@ -40,7 +40,7 @@ export class CartService {
 
     // add item to the cart
     if(alreadyExistsInCart) {
-      // incremenr the quantity of item
+      // increment the quantity of item
       existingCartItem.quantity++;
     }
     else{
