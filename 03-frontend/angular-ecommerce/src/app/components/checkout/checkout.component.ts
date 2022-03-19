@@ -11,6 +11,9 @@ export class CheckoutComponent implements OnInit {
   // create group of forms for checkout using FormGroup class
   checkoutFormGroup!: FormGroup;
 
+  totalPrice: number = 0;
+  totalQuantity: number = 0;
+
   // inject FormBuilder
   constructor(private formBuilder: FormBuilder) { }
 
@@ -59,7 +62,7 @@ export class CheckoutComponent implements OnInit {
   copyShippingToBillingAddress(event: Event){
  
     const ischecked = (<HTMLInputElement>event.target).checked;
-    
+
     if(ischecked){
       this.checkoutFormGroup.controls['billingAddress'].setValue(this.checkoutFormGroup.controls['shippingAddress'].value);
     }
