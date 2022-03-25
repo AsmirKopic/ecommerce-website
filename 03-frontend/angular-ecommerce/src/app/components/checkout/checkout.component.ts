@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, NumberValueAccessor } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, NumberValueAccessor, Validators } from '@angular/forms';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
 import { ShopFormServiceService } from 'src/app/services/shop-form-service.service';
@@ -25,8 +25,6 @@ export class CheckoutComponent implements OnInit {
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
 
-
-
   // inject FormBuilder
   constructor(private formBuilder: FormBuilder,
               private shopFormService: ShopFormServiceService) { }
@@ -38,9 +36,13 @@ export class CheckoutComponent implements OnInit {
       
       // build customer form
       customer: this.formBuilder.group({
-        firstName: [''],
-        lastName: [''],
-        email: ['']
+
+        // add validators
+        firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+        lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+        email: new FormControl('',
+                              [Validators.required,
+                              Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')])
       }),
 
       // build shipping address form
@@ -101,24 +103,47 @@ export class CheckoutComponent implements OnInit {
         this.countries = data;
       }
     );
-
   }
+
+  // getter methods for validation checkout
+  get firstName() { return this.checkoutFormGroup.get('customer.firstName'); }
+  get lastName() { return this.checkoutFormGroup.get('customer.lastName'); }
+  get email() { return this.checkoutFormGroup.get('customer.email'); }
 
   copyShippingToBillingAddress(event: Event){
  
     const ischecked = (<HTMLInputElement>event.target).checked;
 
     if(ischecked){
-      this.checkoutFormGroup.controls['billingAddress'].setValue(this.checkoutFormGroup.controls['shippingAddress'].value);
+      this.checkoutFormGroup.controls['billingAddress']
+          .setValue(this.checkoutFormGroup.controls['shippingAddress'].value);
+
+      // assign shipping address to billing address to auto populate fields
+      this.billingAddressStates = this.shippingAddressStates;
     }
     else{
       this.checkoutFormGroup.controls['billingAddress'].reset();
+
+      // clear billing address fields
+      this.billingAddressStates = [];
     }
   }
 
   onSubmit(){
     console.log("Handling the submit button");
+
+    // check for form validation
+    if (this.checkoutFormGroup.invalid){
+
+      // touching all fields triggers the display of the error messages
+      this.checkoutFormGroup.markAllAsTouched(); 
+    }
+
+
     console.log(this.checkoutFormGroup.get('customer')!.value);
+
+    console.log("Shipping Address is: " + this.checkoutFormGroup.get('shippingAddress')!.value);
+    console.log("Billing Address is: " + this.checkoutFormGroup.get('billingAddress')!.value);
   }
   
   handleMonthsAndYears(){
@@ -156,8 +181,8 @@ export class CheckoutComponent implements OnInit {
     const countryCode = formGroup?.value.country.code;
     const countryName = formGroup?.value.country.name; // optional
 
-    console.log(`{formGroupName} country code: ${countryCode}`);
-    console.log(`{formGroupName} country name: ${countryName}`);
+    console.log(`${formGroupName} country code: ${countryCode}`);
+    console.log(`${formGroupName} country name: ${countryName}`);
 
     this.shopFormService.getStates(countryCode).subscribe(
       data => {
